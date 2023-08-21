@@ -1,0 +1,27 @@
+#!/usr/bin/env zsh
+
+for pdf in ./**/*.pdf; do
+    file=$(basename $pdf | sed 's/.pdf//;s/-hcov/_hcov/;s/-sars/_sars/')
+    base=$(dirname $(dirname $pdf))
+    report_dir="${base}/reports"
+    all="${report_dir}/${file}__all.tsv"
+    json=$(echo $all | cut -d/ -f5 | sed 's/.tsv/.json/;s/__all//')
+
+    gawk -vFNAME=$file 'BEGIN {
+        FS = "\t"
+        OFS = ""
+    }
+
+    $1  ~ /^[a-f0-9]/  {
+        depth_data[r++] = "  [" "\"" $3 "\", " $5  "]"
+    }
+
+    END {
+        printf "[\n";
+        for (i = 0; i < length(depth_data) - 1; i++) {
+            printf "  " depth_data[i]  ",\n"
+        }
+        printf "  " depth_data[i] "\n"
+        printf "]\n";
+    }' $all >./server/${json}
+done
