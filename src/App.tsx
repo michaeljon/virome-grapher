@@ -12,6 +12,7 @@ import SequenceChooser from './SequenceChooser';
 import FeatureList, { gene_type } from './FeatureList';
 import OrganismChooser from './OrganismChooser';
 import { OrganismType } from './Region';
+import { SequenceSet } from './SequenceSet';
 
 Highcharts.setOptions({
   chart: {
@@ -89,8 +90,8 @@ function movingAvg(array: number[], count: number, qualifier?: (val: number) => 
 }
 
 const App = (props: HighchartsReact.Props) => {
-  const [sequences, setSequences] = useState<{ [key: string]: [] }>();
-  const [sequence, setSequence] = useState<string>();
+  const [sequenceList, setSequenceList] = useState<SequenceSet>();
+  const [sequenceid, setSequenceId] = useState<string>();
   const [organisms, setOrganisms] = useState<string[]>();
   const [organism, setOrganism] = useState<OrganismType>();
   const [sampleData, setSampleData] = useState<[]>();
@@ -101,33 +102,34 @@ const App = (props: HighchartsReact.Props) => {
 
   const chartComponentRef = useRef<HighchartsReact.RefObject>(null);
 
-  // get the sample list
+  // get the sequence list
   useEffect(() => {
-    if (sequences !== undefined) {
-      return;
-    }
-
     fetch('http://127.0.0.1:8080/all-samples.json')
-      .then(v => v.json())
-      .then(j => setSequences(j));
-  }, [sequences]);
+      .then(response => response.json())
+      .then(json => setSequenceList(json));
+  }, []);
 
   // selected a sample, fill the organism list
   useEffect(() => {
-    if (sequences === undefined || sequence === undefined) {
+    if (sequenceList === undefined || sequenceid === undefined) {
       return;
     }
 
-    setOrganisms(sequences[sequence]);
-  }, [sequences, sequence]);
+    for (let s = 0; s < sequenceList.length; s++) {
+      if (sequenceList[s].sequenceid === sequenceid) {
+        setOrganisms(sequenceList[s].organisms);
+        break;
+      }
+    }
+  }, [sequenceList, sequenceid]);
 
   // picked an organism, get the data
   useEffect(() => {
-    if (sequence === undefined || organism === undefined) {
+    if (sequenceid === undefined || organism === undefined) {
       return;
     }
 
-    const filename = `${sequence}_${organism}.json`;
+    const filename = `${sequenceid}_${organism}.json`;
 
     fetch(`http://127.0.0.1:8080/${filename}`)
       .then(v => v.json())
@@ -136,7 +138,7 @@ const App = (props: HighchartsReact.Props) => {
         setFeature(undefined);
         setSampleData(j);
       });
-  }, [sequence, organism]);
+  }, [sequenceid, organism]);
 
   const onSequenceChange = (s: string) => {
     const series: Highcharts.SeriesOptionsType[] = [
@@ -153,7 +155,7 @@ const App = (props: HighchartsReact.Props) => {
     setOrganism(undefined);
     setFeature('organism');
     setSampleData(undefined);
-    setSequence(s);
+    setSequenceId(s);
 
     setChartOptions(prevOptions => {
       const xAxis: Highcharts.XAxisOptions = {
@@ -288,11 +290,7 @@ const App = (props: HighchartsReact.Props) => {
   return (
     <Container maxWidth={false} style={{ marginTop: '2em' }}>
       <Stack spacing={2} direction='column'>
-        <SequenceChooser
-          sequences={Object.keys(sequences || {})}
-          sequence={sequence}
-          onSequenceChange={onSequenceChange}
-        />
+        <SequenceChooser sequenceList={sequenceList} sequenceid={sequenceid} onSequenceChange={onSequenceChange} />
         {organisms && <OrganismChooser organism={organism} organisms={organisms} onOrganismChange={onOrganismChange} />}
         <div></div>
       </Stack>

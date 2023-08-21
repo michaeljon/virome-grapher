@@ -1,22 +1,38 @@
 import React, { useState } from 'react';
-import { ListSubheader, MenuItem, Stack, TextField } from '@mui/material';
+import { ListSubheader, MenuItem, Skeleton, Stack, TextField } from '@mui/material';
 
-import FilterTextField, { startsWith } from './FilterTextField';
+import FilterTextField from './FilterTextField';
+import { Sequence, SequenceSet } from './SequenceSet';
 
 const SequenceChooser: React.FC<{
-  sequences: string[];
-  sequence: string | undefined;
+  sequenceList: SequenceSet | undefined;
+  sequenceid: string | undefined;
   onSequenceChange: (s: string) => void;
-}> = ({ sequences, sequence, onSequenceChange }) => {
-  const [filteredItems, setFilteredItems] = useState<string[]>(sequences || []);
+}> = ({ sequenceList, sequenceid: sequence, onSequenceChange }) => {
+  const [filteredItems, setFilteredItems] = useState<SequenceSet>(sequenceList || []);
 
-  const filterSequence = (seq: string, filter: string): boolean => {
+  const startsWith = (text: string | undefined, searchText: string): boolean => {
+    if (text === undefined) {
+      return false;
+    }
+    return text.toLowerCase().startsWith(searchText.toLowerCase());
+  };
+
+  const filterSequence = (seq: Sequence, filter: string): boolean => {
     if (seq === undefined) {
       return false;
     }
 
-    return startsWith(seq, filter);
+    return startsWith(seq.sample, filter) || startsWith(seq.sequenceid, filter);
   };
+
+  if (sequenceList === undefined || sequenceList.length === 0) {
+    return (
+      <Stack direction='column' spacing={2}>
+        <Skeleton animation={false} variant='rounded' height={60} />
+      </Stack>
+    );
+  }
 
   return (
     <Stack direction='column' spacing={2}>
@@ -30,18 +46,21 @@ const SequenceChooser: React.FC<{
         <ListSubheader>
           <FilterTextField
             filterItem={filterSequence}
-            items={sequences}
+            items={sequenceList}
             setFilteredItems={setFilteredItems}
             placeholderText='Search by sequence id'
           ></FilterTextField>
         </ListSubheader>
         <MenuItem value=''>None selected</MenuItem>
         {filteredItems &&
-          filteredItems.sort().map(s => (
-            <MenuItem key={s} value={s}>
-              {s}
-            </MenuItem>
-          ))}
+          filteredItems
+            .filter(s => s.sortkey !== undefined)
+            .sort((a, b) => a.sortkey.localeCompare(b.sortkey))
+            .map(s => (
+              <MenuItem key={s.sequenceid} value={s.sequenceid}>
+                <strong>{s.sequenceid}</strong> - {s.sample}
+              </MenuItem>
+            ))}
       </TextField>
     </Stack>
   );
