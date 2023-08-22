@@ -5,15 +5,23 @@ import { regions } from './data/hcov-regions';
 import * as Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-import { Stack } from '@mui/material';
+import { LicenseInfo } from '@mui/x-license-pro';
 
+import { Stack } from '@mui/material';
 import Container from '@mui/system/Container/Container';
+
+import { OrganismType } from './Region';
+import { SequenceSet } from './SequenceSet';
+
 import SequenceChooser from './SequenceChooser';
 import FeatureList, { gene_type } from './FeatureList';
 import OrganismChooser from './OrganismChooser';
-import { OrganismType } from './Region';
-import { SequenceSet } from './SequenceSet';
 import BatchChooser from './BatchChooser';
+import GapTable from './GapTable';
+
+LicenseInfo.setLicenseKey(
+  'd5b1af81ba5a5af69badc2110cda5c02Tz02MjU4NCxFPTE3MTExMjI2NjM5MTYsUz1wcm8sTE09c3Vic2NyaXB0aW9uLEtWPTI='
+);
 
 Highcharts.setOptions({
   chart: {
@@ -136,6 +144,8 @@ const App = (props: HighchartsReact.Props) => {
 
   // selected a sample, fill the organism list
   useEffect(() => {
+    resetState();
+
     if (sequenceList === undefined || sequenceid === undefined) {
       return;
     }
@@ -156,7 +166,7 @@ const App = (props: HighchartsReact.Props) => {
 
     const filename = `${sequenceid}_${organism}.json`;
 
-    fetch(`http://127.0.0.1:8080/${filename}`)
+    fetch(`http://127.0.0.1:8080/depths/${filename}`)
       .then(v => v.json())
       .then(j => {
         setGenes(regions[organism].genes);
@@ -330,6 +340,8 @@ const App = (props: HighchartsReact.Props) => {
       <HighchartsReact highcharts={Highcharts} options={chartOptions} ref={chartComponentRef} {...props} />
 
       {genes && <FeatureList feature={feature} setFeature={onFeatureChange} features={genes} />}
+
+      {sequenceid && organism && <GapTable sequenceid={sequenceid} organism={organism} setFeature={onFeatureChange} />}
     </Container>
   );
 };
