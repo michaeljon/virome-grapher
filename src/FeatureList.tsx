@@ -3,10 +3,15 @@ import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
 
 export type gene_type = { [key: string]: { start: number; stop: number } } | undefined;
 
-const FeatureList: React.FC<{ feature: string | undefined; features: gene_type; setFeature: (f: string) => void }> = ({ feature, features, setFeature }) => {
+const FeatureList: React.FC<{ feature: string | undefined; features: gene_type; setFeature: (f: string) => void }> = ({
+  feature,
+  features,
+  setFeature,
+}) => {
   if (feature === undefined) {
     setFeature('organism');
   }
+
   return (
     <Box
       sx={{
@@ -18,13 +23,13 @@ const FeatureList: React.FC<{ feature: string | undefined; features: gene_type; 
         },
       }}
     >
-      <ToggleButtonGroup value={feature} exclusive onChange={(_, f) => setFeature(f)}>
-        <ToggleButton key="organism" value="organism">
+      <ToggleButtonGroup value={feature || 'organism'} exclusive onChange={(_, f) => setFeature(f)}>
+        <ToggleButton key='organism' value='organism'>
           Full genome
         </ToggleButton>
 
         {features &&
-          Object.keys(features).map((g) => (
+          Object.keys(features).map(g => (
             <ToggleButton key={g} value={g}>
               {g}
             </ToggleButton>

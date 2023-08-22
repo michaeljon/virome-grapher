@@ -1,29 +1,22 @@
 import React, { useState } from 'react';
 import { ListSubheader, MenuItem, Skeleton, Stack, TextField } from '@mui/material';
 
-import FilterTextField from './FilterTextField';
+import FilterTextField, { containsText } from './FilterTextField';
 import { Sequence, SequenceSet } from './SequenceSet';
 
 const SequenceChooser: React.FC<{
   sequenceList: SequenceSet | undefined;
   sequenceid: string | undefined;
   onSequenceChange: (s: string) => void;
-}> = ({ sequenceList, sequenceid: sequence, onSequenceChange }) => {
+}> = ({ sequenceList, sequenceid, onSequenceChange }) => {
   const [filteredItems, setFilteredItems] = useState<SequenceSet>(sequenceList || []);
-
-  const startsWith = (text: string | undefined, searchText: string): boolean => {
-    if (text === undefined) {
-      return false;
-    }
-    return text.toLowerCase().startsWith(searchText.toLowerCase());
-  };
 
   const filterSequence = (seq: Sequence, filter: string): boolean => {
     if (seq === undefined) {
       return false;
     }
 
-    return startsWith(seq.sample, filter) || startsWith(seq.sequenceid, filter);
+    return containsText(seq.sample, filter) || containsText(seq.sequenceid, filter);
   };
 
   if (sequenceList === undefined || sequenceList.length === 0) {
@@ -39,7 +32,7 @@ const SequenceChooser: React.FC<{
       <TextField
         select={true}
         label='Sequence'
-        value={sequence}
+        value={sequenceid}
         onChange={event => onSequenceChange(event.target.value)}
         helperText=''
       >
@@ -51,7 +44,7 @@ const SequenceChooser: React.FC<{
             placeholderText='Search by sequence id'
           ></FilterTextField>
         </ListSubheader>
-        <MenuItem value=''>None selected</MenuItem>
+        <MenuItem value={undefined}>None selected</MenuItem>
         {filteredItems &&
           filteredItems
             .filter(s => s.sortkey !== undefined)

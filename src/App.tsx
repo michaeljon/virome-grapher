@@ -13,6 +13,7 @@ import FeatureList, { gene_type } from './FeatureList';
 import OrganismChooser from './OrganismChooser';
 import { OrganismType } from './Region';
 import { SequenceSet } from './SequenceSet';
+import BatchChooser from './BatchChooser';
 
 Highcharts.setOptions({
   chart: {
@@ -91,7 +92,9 @@ function movingAvg(array: number[], count: number, qualifier?: (val: number) => 
 
 const App = (props: HighchartsReact.Props) => {
   const [sequenceList, setSequenceList] = useState<SequenceSet>();
-  const [sequenceid, setSequenceId] = useState<string>();
+  const [filteredSequenceList, setFilteredSequenceList] = useState<SequenceSet>();
+  const [batch, setBatch] = useState<string>();
+  const [sequenceid, setSequenceId] = useState<string | undefined>();
   const [organisms, setOrganisms] = useState<string[]>();
   const [organism, setOrganism] = useState<OrganismType>();
   const [sampleData, setSampleData] = useState<[]>();
@@ -106,8 +109,30 @@ const App = (props: HighchartsReact.Props) => {
   useEffect(() => {
     fetch('http://127.0.0.1:8080/all-samples.json')
       .then(response => response.json())
-      .then(json => setSequenceList(json));
+      .then(json => {
+        setSequenceList(json);
+        setFilteredSequenceList(json);
+      });
   }, []);
+
+  const resetState = () => {
+    setGenes(undefined);
+    setOrganisms([]);
+    setOrganism(undefined);
+    setFeature('organism');
+    setSampleData(undefined);
+  };
+
+  useEffect(() => {
+    setSequenceId(undefined);
+    resetState();
+
+    if (batch === undefined || batch === '') {
+      setFilteredSequenceList([]);
+    } else {
+      setFilteredSequenceList(sequenceList?.filter(s => s.batch === batch));
+    }
+  }, [batch]);
 
   // selected a sample, fill the organism list
   useEffect(() => {
@@ -140,6 +165,12 @@ const App = (props: HighchartsReact.Props) => {
       });
   }, [sequenceid, organism]);
 
+  const onBatchChange = (b: string) => {
+    setBatch(b);
+    setFilteredSequenceList([]);
+    console.log('reset batch to ' + b);
+  };
+
   const onSequenceChange = (s: string) => {
     const series: Highcharts.SeriesOptionsType[] = [
       {
@@ -150,12 +181,8 @@ const App = (props: HighchartsReact.Props) => {
       },
     ];
 
-    setGenes(undefined);
-    setOrganisms([]);
-    setOrganism(undefined);
-    setFeature('organism');
-    setSampleData(undefined);
     setSequenceId(s);
+    resetState();
 
     setChartOptions(prevOptions => {
       const xAxis: Highcharts.XAxisOptions = {
@@ -195,79 +222,79 @@ const App = (props: HighchartsReact.Props) => {
   };
 
   const onFeatureChange = (f: string) => {
-    if (f === undefined || f === null) {
-      return;
-    }
-
     const new_series_data: number[] = [];
     const genome_data = sampleData?.map(d => d[1]) as number[];
+    let xplotlines: Highcharts.XAxisPlotLinesOptions[] | undefined = undefined;
+    let xtitle: Highcharts.XAxisTitleOptions | undefined = undefined;
 
-    if (f === 'organism') {
-      for (let i = 0; i < genome_data.length; i++) {
-        new_series_data.push(genome_data[i]);
+    const series: Highcharts.SeriesOptionsType[] = [];
+
+    if (f) {
+      if (f === 'organism') {
+        for (let i = 0; i < genome_data.length; i++) {
+          new_series_data.push(genome_data[i]);
+        }
+      } else {
+        const start = (genes as any)[f].start;
+        const stop = (genes as any)[f].stop;
+
+        for (let i = start; i < stop; i++) {
+          new_series_data.push(genome_data[i]);
+        }
       }
-    } else {
-      const start = (genes as any)[f].start;
-      const stop = (genes as any)[f].stop;
 
-      for (let i = start; i < stop; i++) {
-        new_series_data.push(genome_data[i]);
+      xplotlines =
+        f === 'organism' && genes
+          ? Object.keys(genes).map(g => ({
+              color: 'orange',
+              width: 1,
+              value: (genes as any)[g].start,
+              label: {
+                text: g,
+              },
+            }))
+          : undefined;
+
+      if (f === 'organism' && genes && organism && regions[organism]?.region?.stop) {
+        // add the tail
+        xplotlines?.push({
+          color: 'orange',
+          width: 1,
+          value: regions[organism]?.region?.stop || 0,
+          label: {
+            text: 'end',
+          },
+        });
       }
-    }
 
-    const xplotlines: Highcharts.XAxisPlotLinesOptions[] | undefined =
-      f === 'organism' && genes
-        ? Object.keys(genes).map(g => ({
-            color: 'orange',
-            width: 1,
-            value: (genes as any)[g].start,
-            label: {
-              text: g,
-            },
-          }))
-        : undefined;
-
-    if (f === 'organism' && genes && organism && regions[organism]?.region?.stop) {
-      // add the tail
-      xplotlines?.push({
-        color: 'orange',
-        width: 1,
-        value: regions[organism]?.region?.stop || 0,
-        label: {
-          text: 'end',
-        },
-      });
-    }
-
-    const series: Highcharts.SeriesOptionsType[] = [
-      {
+      series.push({
         id: 'primary',
         type: 'line',
         data: new_series_data,
         marker: { enabled: false },
-      },
-    ];
-
-    if (f === 'organism') {
-      series.push({
-        type: 'spline',
-        lineWidth: 2,
-        data: movingAvg(new_series_data, 200),
-        marker: { enabled: false },
-        color: 'darkblue',
       });
-    }
 
-    const xtitle: Highcharts.XAxisTitleOptions =
-      f === 'organism'
-        ? {
-            useHTML: true,
-            text: 'Position in genome',
-          }
-        : {
-            useHTML: true,
-            text: `${f}<br/><small>(relative to full genome)</small>`,
-          };
+      if (f === 'organism') {
+        series.push({
+          type: 'spline',
+          lineWidth: 2,
+          data: movingAvg(new_series_data, 200),
+          marker: { enabled: false },
+          color: 'darkblue',
+        });
+      }
+
+      xtitle =
+        f === 'organism'
+          ? {
+              useHTML: true,
+              text: 'Position in genome',
+            }
+          : {
+              useHTML: true,
+              text: `${f}<br/><small>(relative to full genome)</small>`,
+            };
+    }
 
     setFeature(f);
     setChartOptions(prevOptions => {
@@ -290,7 +317,12 @@ const App = (props: HighchartsReact.Props) => {
   return (
     <Container maxWidth={false} style={{ marginTop: '2em' }}>
       <Stack spacing={2} direction='column'>
-        <SequenceChooser sequenceList={sequenceList} sequenceid={sequenceid} onSequenceChange={onSequenceChange} />
+        <BatchChooser onBatchChange={onBatchChange} />
+        <SequenceChooser
+          sequenceList={filteredSequenceList}
+          sequenceid={sequenceid}
+          onSequenceChange={onSequenceChange}
+        />
         {organisms && <OrganismChooser organism={organism} organisms={organisms} onOrganismChange={onOrganismChange} />}
         <div></div>
       </Stack>

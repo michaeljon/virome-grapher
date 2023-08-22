@@ -3,7 +3,7 @@
 #
 # usage:
 # cs server 
-# /bin/ls -1 *.json | grep -v all-samples | awk -vALL_SAMPLES=~/tmp/demo2/source-data/all-samples-with-metadata.tsv -f ../scripts/mk-list.awk > all-samples.json
+# /bin/ls -1 *.json | grep -vP "all-samples|batchlist" | awk -vALL_SAMPLES=~/tmp/demo2/source-data/all-samples-with-metadata.tsv -f ../scripts/mk-list.awk > all-samples.json
 #
 
 /.json/ { 
@@ -19,17 +19,19 @@
         samples[sample] = samples[sample] "|" organism
     }
 
-    cmd = "grep " sample " " ALL_SAMPLES " | cut -d '\t' -f 4,6"; cmd | getline metadata; close(cmd)
+    cmd = "grep " sample " " ALL_SAMPLES " | cut -d '\t' -f 3,4,6"; cmd | getline metadata; close(cmd)
 
     split(metadata, a, "\t");
-    internal_names[sample] = a[1]
-    sortkeys[sample] = a[2]
+
+    batches[sample] = a[1]
+    internal_names[sample] = a[2]
+    sortkeys[sample] = a[3]
 }
 
 END {
     printf "[\n"
     for (s in samples) {
-        printf "  { \"sequenceid\": \"" s "\", \"sample\": \"" internal_names[s] "\", \"sortkey\": \"" sortkeys[s] "\", "
+        printf "  { \"sequenceid\": \"" s "\", \"batch\": \"" batches[s] "\", \"sample\": \"" internal_names[s] "\", \"sortkey\": \"" sortkeys[s] "\", "
         printf "\"organisms\": [ "
         
         r = split(samples[s], o, "|");
