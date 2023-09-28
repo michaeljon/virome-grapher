@@ -1,9 +1,9 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { regions } from './data/hcov-regions';
 
 import Highcharts from 'highcharts';
-import HighchartsReact, { HighchartsReactRefObject, HighchartsReactProps } from 'highcharts-react-official';
+import HighchartsReact, { HighchartsReactRefObject } from 'highcharts-react-official';
 
 import FeatureList, { gene_type } from './FeatureList';
 import GapTable from './GapTable';
@@ -65,9 +65,11 @@ function movingAvg(array: number[], count: number, qualifier?: (val: number) => 
 const GraphWidget: React.FC<{
   sequenceid: string | undefined;
   organism: OrganismType | undefined;
+  feature: string | undefined;
+  onFeatureChanged: (f: string) => void;
   sampleData: [] | undefined;
   genes: gene_type;
-}> = ({ sequenceid, organism, sampleData, genes }) => {
+}> = ({ sequenceid, organism, feature, onFeatureChanged, sampleData, genes }) => {
   const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
     title: undefined,
 
@@ -91,28 +93,31 @@ const GraphWidget: React.FC<{
       enabled: false,
     },
   });
-  const [feature, setFeature] = useState<string>('organism');
   const chartComponentRef = useRef<HighchartsReactRefObject>(null);
 
-  const onFeatureChange = (f: string) => {
-    console.log('Feature changing to ' + f);
+  useEffect(() => {
     const new_series_data: number[] = [];
-    const genome_data = sampleData?.map(d => d[1]) as number[];
+    const genome_data = (sampleData?.map(d => d[1]) as number[]) || [];
     let xplotlines: Highcharts.XAxisPlotLinesOptions[] | undefined = undefined;
     let xtitle: Highcharts.XAxisTitleOptions | undefined = undefined;
-
     const series: Highcharts.SeriesOptionsType[] = [];
 
-    setFeature(f);
+    let featureStart = 0;
 
-    if (f) {
-      if (f === 'organism') {
+    if (genes && feature) {
+      if (feature === 'organism') {
+        featureStart = 0;
+      } else {
+        featureStart = (genes as any)[feature].start;
+      }
+
+      if (feature === 'organism') {
         for (let i = 0; i < genome_data.length; i++) {
           new_series_data.push(genome_data[i]);
         }
       } else {
-        const start = (genes as any)[f].start;
-        const stop = (genes as any)[f].stop;
+        const start = (genes as any)[feature].start;
+        const stop = (genes as any)[feature].stop;
 
         for (let i = start; i < stop; i++) {
           new_series_data.push(genome_data[i]);
@@ -120,7 +125,7 @@ const GraphWidget: React.FC<{
       }
 
       xplotlines =
-        f === 'organism' && genes
+        feature === 'organism' && genes
           ? Object.keys(genes).map(g => ({
               color: 'orange',
               width: 1,
@@ -131,7 +136,7 @@ const GraphWidget: React.FC<{
             }))
           : undefined;
 
-      if (f === 'organism' && genes && organism && regions[organism]?.region?.stop) {
+      if (feature === 'organism' && genes && organism && regions[organism]?.region?.stop) {
         // add the tail
         xplotlines?.push({
           color: 'orange',
@@ -150,7 +155,7 @@ const GraphWidget: React.FC<{
         marker: { enabled: false },
       });
 
-      if (f === 'organism') {
+      if (feature === 'organism') {
         series.push({
           type: 'spline',
           lineWidth: 2,
@@ -161,14 +166,14 @@ const GraphWidget: React.FC<{
       }
 
       xtitle =
-        f === 'organism'
+        feature === 'organism'
           ? {
               useHTML: true,
               text: 'Position in genome',
             }
           : {
               useHTML: true,
-              text: `${f}<br/><small>(relative to full genome)</small>`,
+              text: `${feature}<br/><small>(relative to full genome)</small>`,
             };
     }
 
@@ -181,13 +186,17 @@ const GraphWidget: React.FC<{
           enabled: true,
           formatter: (ctx: Highcharts.AxisLabelsFormatterContextObject) => {
             const value = typeof ctx.value === 'string' ? parseInt(ctx.value, 10) + 1 : (ctx.value as number) + 1;
-            return f === 'organism' ? `${value}` : `${(genes as any)[f].start + value}`;
+            return feature === 'organism' ? `${value}` : `${featureStart + value}`;
           },
         },
       };
       return { ...prevOptions, xAxis, series };
     });
-  };
+  }, [feature, genes, organism, sampleData]);
+
+  if (genes === undefined || feature === undefined) {
+    return <Skeleton animation='wave' variant='rounded' height={480} />;
+  }
 
   if (sequenceid === undefined || organism === undefined) {
     return <Skeleton animation='wave' variant='rounded' height={480} />;
@@ -196,8 +205,8 @@ const GraphWidget: React.FC<{
   return (
     <Stack spacing={2} direction='column'>
       <HighchartsReact highcharts={Highcharts} options={chartOptions} ref={chartComponentRef} />
-      {genes && <FeatureList feature={feature} setFeature={onFeatureChange} features={genes} />}
-      {sequenceid && organism && <GapTable sequenceid={sequenceid} organism={organism} setFeature={onFeatureChange} />}
+      {genes && <FeatureList feature={feature} setFeature={onFeatureChanged} features={genes} />}
+      {sequenceid && organism && <GapTable sequenceid={sequenceid} organism={organism} setFeature={onFeatureChanged} />}
     </Stack>
   );
 };

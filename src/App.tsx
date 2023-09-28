@@ -25,12 +25,16 @@ LicenseInfo.setLicenseKey(
 const App = () => {
   const [sequenceList, setSequenceList] = useState<SequenceSet>();
   const [filteredSequenceList, setFilteredSequenceList] = useState<SequenceSet>();
-  const [batch, setBatch] = useState<string>();
-  const [sequenceid, setSequenceId] = useState<string | undefined>();
   const [organisms, setOrganisms] = useState<string[]>();
-  const [organism, setOrganism] = useState<OrganismType | undefined>();
-  const [sampleData, setSampleData] = useState<[]>();
   const [genes, setGenes] = useState<gene_type>();
+
+  const [batch, setBatch] = useState<string>();
+
+  const [sequenceid, setSequenceId] = useState<string | undefined>();
+  const [organism, setOrganism] = useState<OrganismType | undefined>();
+  const [feature, setFeature] = useState<string>('organism');
+
+  const [sampleData, setSampleData] = useState<[]>();
 
   // get the sequence list
   useEffect(() => {
@@ -73,7 +77,6 @@ const App = () => {
       }
     }
 
-    console.log('in the sequenceid effect setting organism to ' + o);
     setOrganism(o);
   }, [sequenceList, sequenceid]);
 
@@ -90,8 +93,6 @@ const App = () => {
 
     const filename = `${sequenceid}_${organism}.json`;
 
-    console.log('i am in the effect ' + filename);
-
     fetch(`http://127.0.0.1:8080/depths/${filename}`)
       .then(v => v.json())
       .then(j => {
@@ -101,6 +102,7 @@ const App = () => {
   }, [sequenceid, organism]);
 
   const resetState = () => {
+    setFeature('organism');
     setGenes(undefined);
     setOrganisms([]);
     setOrganism(undefined);
@@ -109,8 +111,11 @@ const App = () => {
 
   const onBatchChange = (b: string) => {
     setBatch(b);
+
+    setSequenceId(undefined);
+    resetState();
+
     setFilteredSequenceList([]);
-    console.log('reset batch to ' + b);
   };
 
   const onSequenceChange = (s: string) => {
@@ -123,6 +128,8 @@ const App = () => {
   };
 
   const onOrganismChange = (o: OrganismType) => {
+    setFeature('organism');
+    setGenes(undefined);
     setOrganism(o);
   };
 
@@ -139,7 +146,14 @@ const App = () => {
         <div></div>
       </Stack>
 
-      <GraphWidget sequenceid={sequenceid} organism={organism} genes={genes} sampleData={sampleData} />
+      <GraphWidget
+        sequenceid={sequenceid}
+        organism={organism}
+        feature={feature}
+        onFeatureChanged={setFeature}
+        genes={genes}
+        sampleData={sampleData}
+      />
     </Container>
   );
 };
