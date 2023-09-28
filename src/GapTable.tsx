@@ -79,7 +79,7 @@ const GapTable: React.FC<{ sequenceid: string; organism: OrganismType; setFeatur
         loading={false}
         rows={gapList}
         columns={columns}
-        pagination={true}
+        pagination={false}
         disableRowSelectionOnClick={true}
         onRowClick={onRowClick}
         pageSizeOptions={[10]}
