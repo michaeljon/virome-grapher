@@ -8,9 +8,9 @@ const FeatureList: React.FC<{ feature: string | undefined; features: gene_type; 
   features,
   setFeature,
 }) => {
-  if (feature === undefined) {
-    setFeature('organism');
-  }
+  // if (feature === undefined) {
+  //   setFeature('organism');
+  // }
 
   return (
     <Box

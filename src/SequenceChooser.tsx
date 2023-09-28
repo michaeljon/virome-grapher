@@ -10,6 +10,7 @@ const SequenceChooser: React.FC<{
   onSequenceChange: (s: string) => void;
 }> = ({ sequenceList, sequenceid, onSequenceChange }) => {
   const [filteredItems, setFilteredItems] = useState<SequenceSet>(sequenceList || []);
+  const [seqid, setSeqid] = useState(sequenceid || '');
 
   const filterSequence = (seq: Sequence, filter: string): boolean => {
     if (seq === undefined) {
@@ -22,7 +23,7 @@ const SequenceChooser: React.FC<{
   if (sequenceList === undefined || sequenceList.length === 0) {
     return (
       <Stack direction='column' spacing={2}>
-        <Skeleton animation={false} variant='rounded' height={60} />
+        <Skeleton animation='wave' variant='rounded' height={60} />
       </Stack>
     );
   }
@@ -32,8 +33,13 @@ const SequenceChooser: React.FC<{
       <TextField
         select={true}
         label='Sequence'
-        value={sequenceid}
-        onChange={event => onSequenceChange(event.target.value)}
+        value={seqid}
+        onChange={event => {
+          console.log('Sequence changed to ' + event.target.value);
+
+          setSeqid(event.target.value);
+          onSequenceChange(event.target.value);
+        }}
         helperText=''
       >
         <ListSubheader>
@@ -44,7 +50,7 @@ const SequenceChooser: React.FC<{
             placeholderText='Search by sequence id'
           ></FilterTextField>
         </ListSubheader>
-        <MenuItem value={undefined}>None selected</MenuItem>
+        <MenuItem value={''}>None selected</MenuItem>
         {filteredItems &&
           filteredItems
             .filter(s => s.sortkey !== undefined)

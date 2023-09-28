@@ -60,7 +60,7 @@ const GapTable: React.FC<{ sequenceid: string; organism: OrganismType; setFeatur
       return;
     }
 
-    const filename = `${sequenceid}-${organism}.gap-report.json`;
+    const filename = `${sequenceid}+${organism}+gap-report.json`;
 
     fetch(`http://127.0.0.1:8080/gaps/${filename}`)
       .then(response => response.json())
@@ -82,6 +82,7 @@ const GapTable: React.FC<{ sequenceid: string; organism: OrganismType; setFeatur
         pagination={true}
         disableRowSelectionOnClick={true}
         onRowClick={onRowClick}
+        pageSizeOptions={[10]}
         initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
       />
     </div>

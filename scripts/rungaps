@@ -1,0 +1,17 @@
+#!/usr/bin/env zsh
+
+TOOLROOT=/Users/michaeljon/src/informatics/pipeline-builder/tools/new-hcov-report
+rm -f gapjobs
+
+for d in RunData/**/*.depth.gz; do
+    r=$(realpath $d)
+    f=$(basename $r)
+    w=$(dirname $r)
+
+    s=$(echo $f | cut -d. -f1)
+    o=$(echo $f | cut -d. -f2)
+
+    echo "mkdir -p ${w}/reports && ${TOOLROOT}/gap-report.py -s ${s} -c ${r} -j -f ${o} -o ${w}/reports/${s}+${o}+gap-report.json" >>gapjobs
+done
+
+cat gapjobs | parallel --joblog gapjobs.log

@@ -1,6 +1,8 @@
 BEGIN {
     FS = "\t"
     OFS = ""
+
+    batches["NOT-REGISTERED"] = 1
 }
 
 $1 != "sequenceid" {

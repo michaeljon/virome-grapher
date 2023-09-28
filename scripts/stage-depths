@@ -1,5 +1,12 @@
 #!/usr/bin/env zsh
 
+TARGET=$1
+
+if [[ -z ${TARGET} || ! -d ${TARGET} ]]; then
+    echo "You either forgot the supply the target directory, or it doesn't exists"
+    exit 1
+fi
+
 for pdf in ./**/*.pdf; do
     file=$(basename $pdf | sed 's/.pdf//;s/-hcov/_hcov/;s/-sars/_sars/')
     base=$(dirname $(dirname $pdf))
@@ -23,5 +30,5 @@ for pdf in ./**/*.pdf; do
         }
         printf "  " depth_data[i] "\n"
         printf "]\n";
-    }' $all >./server/${json}
+    }' $all >${TARGET}/server/depths/${json}
 done
