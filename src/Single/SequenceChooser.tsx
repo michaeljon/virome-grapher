@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ListSubheader, MenuItem, Skeleton, Stack, TextField } from '@mui/material';
 
-import FilterTextField, { containsText } from './FilterTextField';
-import { Sequence, SequenceSet } from './SequenceSet';
+import FilterTextField, { containsText } from '../Shared/FilterTextField';
+import { Sequence, SequenceSet } from '../Shared/SequenceSet';
 
 const SequenceChooser: React.FC<{
   sequenceList: SequenceSet | undefined;

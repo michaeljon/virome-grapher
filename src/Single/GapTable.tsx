@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { OrganismType } from './Region';
+import { OrganismType } from '../Shared/Region';
 import { DataGridPro, GridCallbackDetails, GridColDef, GridRowParams, MuiEvent } from '@mui/x-data-grid-pro';
 
 type GapData = {

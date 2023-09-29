@@ -1,4 +1,4 @@
-import { Regions } from '../Region';
+import { Regions } from '../Shared/Region';
 
 export const regions: Regions = {
   'hev-a': {

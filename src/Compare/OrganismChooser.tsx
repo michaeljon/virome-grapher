@@ -1,6 +1,6 @@
 import React from 'react';
 import { MenuItem, Skeleton, Stack, TextField } from '@mui/material';
-import { OrganismType } from './Region';
+import { OrganismType } from '../Shared/Region';
 
 const OrganismChooser: React.FC<{
   organism: OrganismType | undefined;
