@@ -34,6 +34,8 @@ const Compare: React.FC = () => {
   const [genes, setGenes] = useState<gene_type>();
   const [feature, setFeature] = useState<string>('organism');
 
+  const [loading, setLoading] = useState(true);
+
   // get the sequence list
   useEffect(() => {
     fetch('/server/all-samples.json')
@@ -54,8 +56,9 @@ const Compare: React.FC = () => {
   }, [organism, sequenceList]);
 
   useEffect(() => {
+    setSequenceData(undefined);
+
     if (comparables === undefined) {
-      setSequenceData(undefined);
       return;
     }
 
@@ -65,7 +68,10 @@ const Compare: React.FC = () => {
       jobs.push(job);
     }
 
-    Promise.all(jobs).then(r => setSequenceData(r));
+    Promise.all(jobs).then(r => {
+      setSequenceData(r);
+      setLoading(false);
+    });
   }, [comparables, organism]);
 
   const onOrganismChange = (o: OrganismType) => {
@@ -73,6 +79,12 @@ const Compare: React.FC = () => {
   };
 
   const onCompare = (sequences: Sequence[]) => {
+    console.log({
+      where: 'handling onCompare',
+      sequences,
+    });
+
+    setLoading(true);
     setComparables(sequences);
   };
 
@@ -81,7 +93,7 @@ const Compare: React.FC = () => {
       <Stack spacing={2} direction='column'>
         {organisms && <OrganismChooser organism={organism} organisms={organisms} onOrganismChange={onOrganismChange} />}
         {organism && <SequenceList sequences={filteredSequenceList} onCompare={onCompare} />}
-        {comparables && sequenceData && genes && (
+        {loading === false && (
           <GraphWidget
             organism={organism}
             feature={feature}

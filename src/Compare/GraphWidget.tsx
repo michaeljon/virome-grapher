@@ -98,8 +98,19 @@ const GraphWidget: React.FC<{
 
       const dataItems = sampleData?.length || 0;
 
+      console.log({
+        where: 'right before computing the series data',
+        comparables,
+        sampleData,
+      });
+
       for (let data = 0; data < dataItems; data++) {
         const genome_data: number[][] = sampleData[data];
+
+        console.log({
+          where: 'creating a series element',
+          element: data,
+        });
 
         series.push({
           id: comparables[data].sequenceid,

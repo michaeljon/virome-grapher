@@ -22,19 +22,20 @@ Highcharts.setOptions({
 
 const GraphWidget: React.FC<{
   sequenceid: string | undefined;
+  sampleName: string | undefined;
   organism: OrganismType | undefined;
   feature: string | undefined;
   onFeatureChanged: (f: string) => void;
   sampleData: [] | undefined;
   genes: gene_type;
-}> = ({ sequenceid, organism, feature, onFeatureChanged, sampleData, genes }) => {
+}> = ({ sequenceid, sampleName, organism, feature, onFeatureChanged, sampleData, genes }) => {
   const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
     title: undefined,
 
     yAxis: {
       title: {
         useHTML: true,
-        text: 'Depth<br/><small>(log 10)</small>',
+        text: '<span>Depth</span><small>&nbsp;&nbsp;(log 10)</small>',
       },
       type: 'logarithmic',
     },
@@ -43,6 +44,12 @@ const GraphWidget: React.FC<{
       title: {
         text: 'Position in genome',
       },
+    },
+
+    tooltip: {
+      pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b><br/>',
+      valueDecimals: 0,
+      split: true,
     },
 
     legend: { enabled: false },
@@ -54,8 +61,6 @@ const GraphWidget: React.FC<{
   const chartComponentRef = useRef<HighchartsReactRefObject>(null);
 
   useEffect(() => {
-    const new_series_data: number[] = [];
-    const genome_data = (sampleData?.map(d => d[1]) as number[]) || [];
     let xplotlines: Highcharts.XAxisPlotLinesOptions[] | undefined = undefined;
     let xtitle: Highcharts.XAxisTitleOptions | undefined = undefined;
     const series: Highcharts.SeriesOptionsType[] = [];
@@ -67,19 +72,6 @@ const GraphWidget: React.FC<{
         featureStart = 0;
       } else {
         featureStart = (genes as any)[feature].start;
-      }
-
-      if (feature === 'organism') {
-        for (let i = 0; i < genome_data.length; i++) {
-          new_series_data.push(genome_data[i]);
-        }
-      } else {
-        const start = (genes as any)[feature].start;
-        const stop = (genes as any)[feature].stop;
-
-        for (let i = start; i < stop; i++) {
-          new_series_data.push(genome_data[i]);
-        }
       }
 
       xplotlines =
@@ -106,18 +98,25 @@ const GraphWidget: React.FC<{
         });
       }
 
+      const series_data: number[] =
+        feature === 'organism'
+          ? (sampleData || []).map(g => g[1])
+          : (sampleData || []).slice((genes as any)[feature].start, (genes as any)[feature].stop).map(g => g[1]);
+
       series.push({
         id: 'primary',
+        name: sampleName,
         type: 'line',
-        data: new_series_data,
+        data: series_data,
         marker: { enabled: false },
       });
 
       if (feature === 'organism') {
         series.push({
           type: 'spline',
+          name: 'Rolling average',
           lineWidth: 2,
-          data: movingAvg(new_series_data, 200),
+          data: movingAvg(series_data, 200),
           marker: { enabled: false },
           color: 'darkblue',
         });
@@ -131,7 +130,7 @@ const GraphWidget: React.FC<{
             }
           : {
               useHTML: true,
-              text: `${feature}<br/><small>(relative to full genome)</small>`,
+              text: `<span>${feature}</span><small>&nbsp;&nbsp;(relative to full genome)</small>`,
             };
     }
 

@@ -9,9 +9,16 @@ fi
 # login to ECR
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 593076166250.dkr.ecr.us-east-1.amazonaws.com
 
+# build the source
+yarn build
+
 # build, tag, and push the image
 docker build -t virome_grapher .
-docker tag virome_grapher:latest 593076166250.dkr.ecr.us-east-1.amazonaws.com/virome_grapher:latest
-docker push 593076166250.dkr.ecr.us-east-1.amazonaws.com/virome_grapher:latest
+
+TAG=$(date +%s)
+docker tag virome_grapher:latest 593076166250.dkr.ecr.us-east-1.amazonaws.com/virome_grapher:${TAG}
+docker push 593076166250.dkr.ecr.us-east-1.amazonaws.com/virome_grapher:${TAG}
 
 # todo - update the task, restart the service
+echo "Run the following on the EC2"
+echo "docker run --restart=unless-stopped -p 8080:8080 593076166250.dkr.ecr.us-east-1.amazonaws.com/virome_grapher:${TAG}"

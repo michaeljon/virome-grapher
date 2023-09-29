@@ -28,6 +28,7 @@ const Single = () => {
 
   const [batch, setBatch] = useState<string>();
 
+  const [sampleName, setSampleName] = useState<string | undefined>();
   const [sequenceid, setSequenceId] = useState<string | undefined>();
   const [organism, setOrganism] = useState<OrganismType | undefined>();
   const [feature, setFeature] = useState<string>('organism');
@@ -45,6 +46,7 @@ const Single = () => {
   }, []);
 
   useEffect(() => {
+    setSampleName(undefined);
     setSequenceId(undefined);
     resetState();
 
@@ -110,6 +112,7 @@ const Single = () => {
   const onBatchChange = (b: string) => {
     setBatch(b);
 
+    setSampleName(undefined);
     setSequenceId(undefined);
     resetState();
 
@@ -121,6 +124,7 @@ const Single = () => {
       setOrganism(undefined);
     }
 
+    setSampleName(sequenceList?.filter(sq => sq.sequenceid === s)[0].sample);
     setSequenceId(s);
     resetState();
   };
@@ -146,6 +150,7 @@ const Single = () => {
 
       <GraphWidget
         sequenceid={sequenceid}
+        sampleName={sampleName}
         organism={organism}
         feature={feature}
         onFeatureChanged={setFeature}
