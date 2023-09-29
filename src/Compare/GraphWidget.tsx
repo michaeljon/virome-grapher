@@ -2,60 +2,27 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { regions } from '../data/hcov-regions';
 
-import Highcharts from 'highcharts';
+import Highcharts, { Options } from 'highcharts';
 import HighchartsReact, { HighchartsReactRefObject } from 'highcharts-react-official';
 
 import FeatureList, { gene_type } from '../Shared/FeatureList';
 
 import { OrganismType } from '../Shared/Region';
-import { Skeleton, Stack } from '@mui/material';
+import { Skeleton, Stack, useMediaQuery } from '@mui/material';
 import { Sequence } from '../Shared/SequenceSet';
-
-Highcharts.setOptions({
-  chart: {
-    style: {
-      fontFamily: 'Roboto',
-    },
-  },
-});
+import DefaultChartOptions from '../themes/DefaultChartOptions';
 
 const GraphWidget: React.FC<{
-  organism: OrganismType | undefined;
+  organism: OrganismType | '';
   feature: string | undefined;
   onFeatureChanged: (f: string) => void;
   comparables: Sequence[] | undefined;
   sampleData: [][] | undefined;
   genes: gene_type;
 }> = ({ organism, feature, onFeatureChanged, comparables, sampleData, genes }) => {
-  const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
-    title: undefined,
+  const isDarkModeEnabled = useMediaQuery('(prefers-color-scheme: dark)');
 
-    yAxis: {
-      title: {
-        useHTML: true,
-        text: '<span>Depth</span><small>&nbsp;&nbsp;(log 10)</small>',
-      },
-      type: 'logarithmic',
-    },
-
-    xAxis: {
-      title: {
-        text: 'Position in genome',
-      },
-    },
-
-    tooltip: {
-      pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b><br/>',
-      valueDecimals: 0,
-      split: true,
-    },
-
-    legend: { enabled: true },
-
-    credits: {
-      enabled: false,
-    },
-  });
+  const [chartOptions, setChartOptions] = useState<Highcharts.Options>(DefaultChartOptions);
   const chartComponentRef = useRef<HighchartsReactRefObject>(null);
 
   useEffect(() => {
@@ -65,7 +32,7 @@ const GraphWidget: React.FC<{
 
     let featureStart = 0;
 
-    if (organism && comparables && sampleData && genes && feature) {
+    if (organism !== '' && comparables && sampleData && genes && feature) {
       if (feature === 'organism') {
         featureStart = 0;
       } else {
@@ -80,6 +47,9 @@ const GraphWidget: React.FC<{
               value: (genes as any)[g].start,
               label: {
                 text: g,
+                style: {
+                  color: isDarkModeEnabled ? 'white' : 'orange',
+                },
               },
             }))
           : undefined;
@@ -92,25 +62,17 @@ const GraphWidget: React.FC<{
           value: regions[organism]?.region?.stop || 0,
           label: {
             text: 'end',
+            style: {
+              color: isDarkModeEnabled ? 'white' : 'orange',
+            },
           },
         });
       }
 
       const dataItems = sampleData?.length || 0;
 
-      console.log({
-        where: 'right before computing the series data',
-        comparables,
-        sampleData,
-      });
-
       for (let data = 0; data < dataItems; data++) {
         const genome_data: number[][] = sampleData[data];
-
-        console.log({
-          where: 'creating a series element',
-          element: data,
-        });
 
         series.push({
           id: comparables[data].sequenceid,
@@ -136,15 +98,6 @@ const GraphWidget: React.FC<{
             };
     }
 
-    console.log({
-      where: 'before setting chart options',
-      xplotlines,
-      xtitle,
-      feature,
-      organism,
-      series,
-    });
-
     setChartOptions(prevOptions => {
       const xAxis: Highcharts.XAxisOptions = {
         ...prevOptions.xAxis,
@@ -160,7 +113,7 @@ const GraphWidget: React.FC<{
       };
       return { ...prevOptions, xAxis, series };
     });
-  }, [feature, genes, organism, comparables, sampleData]);
+  }, [isDarkModeEnabled, feature, genes, organism, comparables, sampleData]);
 
   if (sampleData === undefined || comparables === undefined) {
     return <Skeleton animation='wave' variant='rounded' height={480} />;
@@ -170,7 +123,7 @@ const GraphWidget: React.FC<{
     return <Skeleton animation='wave' variant='rounded' height={480} />;
   }
 
-  if (organism === undefined) {
+  if (organism === '') {
     return <Skeleton animation='wave' variant='rounded' height={480} />;
   }
 

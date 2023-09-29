@@ -3,9 +3,9 @@ import { MenuItem, Skeleton, Stack, TextField } from '@mui/material';
 import { OrganismType } from '../Shared/Region';
 
 const OrganismChooser: React.FC<{
-  organism: OrganismType | undefined;
+  organism: OrganismType | '';
   organisms: string[];
-  onOrganismChange: (o: OrganismType) => void;
+  onOrganismChange: (o: OrganismType | '') => void;
 }> = ({ organism, organisms, onOrganismChange }) => {
   if (organisms === undefined || organisms.length === 0) {
     return (
@@ -22,11 +22,11 @@ const OrganismChooser: React.FC<{
         label='Organism'
         value={organism}
         onChange={event => {
-          onOrganismChange(event.target.value as OrganismType);
+          onOrganismChange(event.target.value as OrganismType | '');
         }}
         helperText=''
       >
-        <MenuItem value={undefined}>None selected</MenuItem>
+        <MenuItem value={''}>None selected</MenuItem>
         {organisms &&
           organisms.map(o => (
             <MenuItem key={o} value={o}>

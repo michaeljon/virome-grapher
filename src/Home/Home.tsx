@@ -14,7 +14,7 @@ import Statistics from './Statistics';
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
   ...theme.typography.body2,
-  padding: theme.spacing(1),
+  padding: theme.spacing(2),
   textAlign: 'center',
   color: theme.palette.text.secondary,
 }));
@@ -22,10 +22,10 @@ const Item = styled(Paper)(({ theme }) => ({
 const WelcomeBanner: React.FC<{ children?: React.ReactNode }> = props => {
   const style = {
     backgroundImage: `url(${backgroundLogo})`,
-    backgroundPosition: '0% 25%',
+    backgroundPosition: '0% 10%',
     backgroundSize: 'cover',
     backgroundRepeat: 'no-repeat',
-    backgroundColor: 'rgb(240, 240, 240, 0.75)',
+    backgroundColor: 'rgb(240, 240, 240, 0.25)',
     color: 'black',
   };
 

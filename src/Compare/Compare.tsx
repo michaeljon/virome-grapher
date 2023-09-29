@@ -10,8 +10,7 @@ import SequenceList from './SequenceList';
 import GraphWidget from './GraphWidget';
 import { gene_type } from '../Shared/FeatureList';
 
-const Compare: React.FC = () => {
-  const [sequenceList, setSequenceList] = useState<SequenceSet>();
+const Compare: React.FC<{ sequenceList: SequenceSet }> = ({ sequenceList }) => {
   const [filteredSequenceList, setFilteredSequenceList] = useState<SequenceSet>();
 
   const [organisms] = useState<OrganismType[]>([
@@ -27,7 +26,7 @@ const Compare: React.FC = () => {
     'hcov-hku1',
     'sars-cov-2',
   ]);
-  const [organism, setOrganism] = useState<OrganismType | undefined>();
+  const [organism, setOrganism] = useState<OrganismType | ''>('');
   const [comparables, setComparables] = useState<Sequence[]>();
   const [sequenceData, setSequenceData] = useState<[][]>();
 
@@ -36,18 +35,8 @@ const Compare: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
 
-  // get the sequence list
   useEffect(() => {
-    fetch('/server/all-samples.json')
-      .then(response => response.json())
-      .then(json => {
-        setSequenceList(json);
-        setFilteredSequenceList([]);
-      });
-  }, []);
-
-  useEffect(() => {
-    if (organism === undefined) {
+    if (organism === '') {
       setFilteredSequenceList([]);
     } else {
       setGenes(regions[organism].genes);
@@ -74,16 +63,11 @@ const Compare: React.FC = () => {
     });
   }, [comparables, organism]);
 
-  const onOrganismChange = (o: OrganismType) => {
+  const onOrganismChange = (o: OrganismType | '') => {
     setOrganism(o);
   };
 
   const onCompare = (sequences: Sequence[]) => {
-    console.log({
-      where: 'handling onCompare',
-      sequences,
-    });
-
     setLoading(true);
     setComparables(sequences);
   };

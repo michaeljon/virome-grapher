@@ -26,7 +26,9 @@ const BatchChooser: React.FC<{ onBatchChange: (batch: string) => void }> = ({ on
         onChange={event => changeBatch(event.target.value)}
         helperText=''
       >
-        <MenuItem value={undefined}>None selected</MenuItem>
+        <MenuItem key='' value={''} selected={batch === ''}>
+          None selected
+        </MenuItem>
         {batchList &&
           batchList
             .filter(b => b !== undefined)

@@ -20,37 +20,31 @@ LicenseInfo.setLicenseKey(
   'd5b1af81ba5a5af69badc2110cda5c02Tz02MjU4NCxFPTE3MTExMjI2NjM5MTYsUz1wcm8sTE09c3Vic2NyaXB0aW9uLEtWPTI='
 );
 
-const Single = () => {
-  const [sequenceList, setSequenceList] = useState<SequenceSet>();
+const Single: React.FC<{ sequenceList: SequenceSet }> = ({ sequenceList }) => {
   const [filteredSequenceList, setFilteredSequenceList] = useState<SequenceSet>();
   const [organisms, setOrganisms] = useState<string[]>();
   const [genes, setGenes] = useState<gene_type>();
 
-  const [batch, setBatch] = useState<string>();
+  const [batch, setBatch] = useState<string>('');
 
-  const [sampleName, setSampleName] = useState<string | undefined>();
-  const [sequenceid, setSequenceId] = useState<string | undefined>();
-  const [organism, setOrganism] = useState<OrganismType | undefined>();
+  const [sampleName, setSampleName] = useState<string | ''>('');
+  const [sequenceid, setSequenceId] = useState<string | ''>('');
+  const [organism, setOrganism] = useState<OrganismType | ''>('');
   const [feature, setFeature] = useState<string>('organism');
 
   const [sampleData, setSampleData] = useState<[]>();
 
   // get the sequence list
   useEffect(() => {
-    fetch('/server/all-samples.json')
-      .then(response => response.json())
-      .then(json => {
-        setSequenceList(json);
-        setFilteredSequenceList([]);
-      });
-  }, []);
+    setFilteredSequenceList(sequenceList || []);
+  }, [sequenceList]);
 
   useEffect(() => {
-    setSampleName(undefined);
-    setSequenceId(undefined);
+    setSampleName('');
+    setSequenceId('');
     resetState();
 
-    if (batch === undefined || batch === '') {
+    if (batch === '') {
       setFilteredSequenceList([]);
     } else {
       setFilteredSequenceList(sequenceList?.filter(s => s.batch === batch));
@@ -65,7 +59,7 @@ const Single = () => {
       return;
     }
 
-    let o = undefined;
+    let o: OrganismType | '' = '';
 
     for (let s = 0; s < sequenceList.length; s++) {
       if (sequenceList[s].sequenceid === sequenceid) {
@@ -82,12 +76,7 @@ const Single = () => {
 
   // picked an organism, get the data
   useEffect(() => {
-    if (sequenceid === undefined || organism === undefined) {
-      return;
-    }
-
-    // stupid
-    if ((organism as any) === '') {
+    if (sequenceid === '' || organism === '') {
       return;
     }
 
@@ -105,26 +94,26 @@ const Single = () => {
     setFeature('organism');
     setGenes(undefined);
     setOrganisms([]);
-    setOrganism(undefined);
+    setOrganism('');
     setSampleData(undefined);
   };
 
   const onBatchChange = (b: string) => {
     setBatch(b);
 
-    setSampleName(undefined);
-    setSequenceId(undefined);
+    setSampleName('');
+    setSequenceId('');
     resetState();
 
     setFilteredSequenceList([]);
   };
 
   const onSequenceChange = (s: string) => {
-    if (s === undefined) {
-      setOrganism(undefined);
+    if (s === '') {
+      setOrganism('');
     }
 
-    setSampleName(sequenceList?.filter(sq => sq.sequenceid === s)[0].sample);
+    setSampleName(filteredSequenceList?.filter(sq => sq.sequenceid === s)[0].sample || '');
     setSequenceId(s);
     resetState();
   };

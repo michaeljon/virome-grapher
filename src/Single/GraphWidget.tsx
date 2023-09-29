@@ -9,55 +9,22 @@ import FeatureList, { gene_type } from '../Shared/FeatureList';
 import GapTable from './GapTable';
 
 import { OrganismType } from '../Shared/Region';
-import { Skeleton, Stack } from '@mui/material';
+import { Skeleton, Stack, useMediaQuery } from '@mui/material';
 import { movingAvg } from '../Shared/math';
-
-Highcharts.setOptions({
-  chart: {
-    style: {
-      fontFamily: 'Roboto',
-    },
-  },
-});
+import DefaultChartOptions from '../themes/DefaultChartOptions';
 
 const GraphWidget: React.FC<{
-  sequenceid: string | undefined;
-  sampleName: string | undefined;
-  organism: OrganismType | undefined;
+  sequenceid: string | '';
+  sampleName: string | '';
+  organism: OrganismType | '';
   feature: string | undefined;
   onFeatureChanged: (f: string) => void;
   sampleData: [] | undefined;
   genes: gene_type;
 }> = ({ sequenceid, sampleName, organism, feature, onFeatureChanged, sampleData, genes }) => {
-  const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
-    title: undefined,
+  const isDarkModeEnabled = useMediaQuery('(prefers-color-scheme: dark)');
 
-    yAxis: {
-      title: {
-        useHTML: true,
-        text: '<span>Depth</span><small>&nbsp;&nbsp;(log 10)</small>',
-      },
-      type: 'logarithmic',
-    },
-
-    xAxis: {
-      title: {
-        text: 'Position in genome',
-      },
-    },
-
-    tooltip: {
-      pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b><br/>',
-      valueDecimals: 0,
-      split: true,
-    },
-
-    legend: { enabled: false },
-
-    credits: {
-      enabled: false,
-    },
-  });
+  const [chartOptions, setChartOptions] = useState<Highcharts.Options>(DefaultChartOptions);
   const chartComponentRef = useRef<HighchartsReactRefObject>(null);
 
   useEffect(() => {
@@ -82,11 +49,14 @@ const GraphWidget: React.FC<{
               value: (genes as any)[g].start,
               label: {
                 text: g,
+                style: {
+                  color: isDarkModeEnabled ? 'white' : 'orange',
+                },
               },
             }))
           : undefined;
 
-      if (feature === 'organism' && genes && organism && regions[organism]?.region?.stop) {
+      if (feature === 'organism' && organism !== '' && regions[organism]?.region?.stop) {
         // add the tail
         xplotlines?.push({
           color: 'orange',
@@ -94,6 +64,9 @@ const GraphWidget: React.FC<{
           value: regions[organism]?.region?.stop || 0,
           label: {
             text: 'end',
+            style: {
+              color: isDarkModeEnabled ? 'white' : 'orange',
+            },
           },
         });
       }
@@ -118,7 +91,7 @@ const GraphWidget: React.FC<{
           lineWidth: 2,
           data: movingAvg(series_data, 200),
           marker: { enabled: false },
-          color: 'darkblue',
+          // color: 'darkblue',
         });
       }
 
@@ -149,13 +122,13 @@ const GraphWidget: React.FC<{
       };
       return { ...prevOptions, xAxis, series };
     });
-  }, [feature, genes, organism, sampleData]);
+  }, [isDarkModeEnabled, feature, genes, sampleName, organism, sampleData]);
 
   if (genes === undefined || feature === undefined) {
     return <Skeleton animation='wave' variant='rounded' height={480} />;
   }
 
-  if (sequenceid === undefined || organism === undefined) {
+  if (sequenceid === '' || organism === '') {
     return <Skeleton animation='wave' variant='rounded' height={480} />;
   }
 
@@ -163,7 +136,7 @@ const GraphWidget: React.FC<{
     <Stack spacing={2} direction='column'>
       <HighchartsReact highcharts={Highcharts} options={chartOptions} ref={chartComponentRef} />
       {genes && <FeatureList feature={feature} setFeature={onFeatureChanged} features={genes} />}
-      {sequenceid && organism && <GapTable sequenceid={sequenceid} organism={organism} setFeature={onFeatureChanged} />}
+      <GapTable sequenceid={sequenceid} organism={organism} setFeature={onFeatureChanged} />
     </Stack>
   );
 };

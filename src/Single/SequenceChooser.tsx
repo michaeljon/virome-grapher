@@ -6,17 +6,17 @@ import { Sequence, SequenceSet } from '../Shared/SequenceSet';
 
 const SequenceChooser: React.FC<{
   sequenceList: SequenceSet | undefined;
-  sequenceid: string | undefined;
+  sequenceid: string | '';
   onSequenceChange: (s: string) => void;
 }> = ({ sequenceList, sequenceid, onSequenceChange }) => {
   const [filteredItems, setFilteredItems] = useState<SequenceSet>(sequenceList || []);
 
-  const filterSequence = (seq: Sequence, filter: string): boolean => {
-    if (seq === undefined) {
+  const filterSequence = (s: Sequence, filter: string): boolean => {
+    if (s === undefined) {
       return false;
     }
 
-    return containsText(seq.sample, filter) || containsText(seq.sequenceid, filter);
+    return containsText(s.sample, filter) || containsText(s.sequenceid, filter);
   };
 
   if (sequenceList === undefined || sequenceList.length === 0) {
