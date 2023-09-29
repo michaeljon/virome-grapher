@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# get the aws environment variables into the terminal
+if [[ -z ${AWS_ACCESS_KEY_ID} || -z ${AWS_SECRET_ACCESS_KEY} || -z ${AWS_SESSION_TOKEN} ]]; then
+    echo "You need to have your AWS environment variables set for this..."
+    exit 1
+fi
+
+# login to ECR
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 593076166250.dkr.ecr.us-east-1.amazonaws.com
+
+# build, tag, and push the image
+docker build -t virome_grapher .
+docker tag virome_grapher:latest 593076166250.dkr.ecr.us-east-1.amazonaws.com/virome_grapher:latest
+docker push 593076166250.dkr.ecr.us-east-1.amazonaws.com/virome_grapher:latest
+
+# todo - update the task, restart the service

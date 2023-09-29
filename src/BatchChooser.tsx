@@ -7,7 +7,7 @@ const BatchChooser: React.FC<{ onBatchChange: (batch: string) => void }> = ({ on
   const [batchList, setBatchList] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8080/batchlist.json')
+    fetch('/server/batchlist.json')
       .then(response => response.json())
       .then(json => setBatchList(json));
   }, []);

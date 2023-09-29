@@ -38,7 +38,7 @@ const App = () => {
 
   // get the sequence list
   useEffect(() => {
-    fetch('http://127.0.0.1:8080/all-samples.json')
+    fetch('/server/all-samples.json')
       .then(response => response.json())
       .then(json => {
         setSequenceList(json);
@@ -93,7 +93,7 @@ const App = () => {
 
     const filename = `${sequenceid}_${organism}.json`;
 
-    fetch(`http://127.0.0.1:8080/depths/${filename}`)
+    fetch(`/server/depths/${filename}`)
       .then(v => v.json())
       .then(j => {
         setGenes(regions[organism].genes);

@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+    virome_grapher:
+        container_name: virome_grapher
+        image: virome_grapher
+        build:
+            context: .
+            dockerfile: dockerfile
+        restart: always
+        ports:
+            - "8080:8080"

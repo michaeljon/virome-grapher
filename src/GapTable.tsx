@@ -62,7 +62,7 @@ const GapTable: React.FC<{ sequenceid: string; organism: OrganismType; setFeatur
 
     const filename = `${sequenceid}+${organism}+gap-report.json`;
 
-    fetch(`http://127.0.0.1:8080/gaps/${filename}`)
+    fetch(`/server/gaps/${filename}`)
       .then(response => response.json())
       .then(json => {
         setGapList(json.map((r: any, i: number) => ({ ...r, id: i })));
