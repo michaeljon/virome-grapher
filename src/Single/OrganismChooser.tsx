@@ -1,5 +1,5 @@
 import React from 'react';
-import { MenuItem, Skeleton, Stack, TextField } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select, Skeleton, Stack } from '@mui/material';
 import { OrganismType } from '../Shared/Region';
 
 const OrganismChooser: React.FC<{
@@ -16,25 +16,24 @@ const OrganismChooser: React.FC<{
   }
 
   return (
-    <Stack direction='column' spacing={2}>
-      <TextField
-        select={true}
-        label='Organism'
+    <FormControl fullWidth>
+      <InputLabel id='single-organism-label'>Organism</InputLabel>
+      <Select
+        displayEmpty
+        labelId='single-organism-label'
+        id='single-organism-chooser'
         value={organism}
-        onChange={event => {
-          onOrganismChange(event.target.value as OrganismType);
-        }}
-        helperText=''
+        label='Organism'
+        onChange={event => onOrganismChange(event.target.value as OrganismType)}
       >
-        <MenuItem value={''}>None selected</MenuItem>
         {organisms &&
           organisms.map(o => (
             <MenuItem key={o} value={o}>
               {o}
             </MenuItem>
           ))}
-      </TextField>
-    </Stack>
+      </Select>
+    </FormControl>
   );
 };
 

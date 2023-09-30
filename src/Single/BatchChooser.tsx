@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { MenuItem, Stack, TextField } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 
 const BatchChooser: React.FC<{ onBatchChange: (batch: string) => void }> = ({ onBatchChange }) => {
   const [batch, setBatch] = useState<string>('');
@@ -18,17 +18,16 @@ const BatchChooser: React.FC<{ onBatchChange: (batch: string) => void }> = ({ on
   };
 
   return (
-    <Stack direction='column' spacing={2}>
-      <TextField
-        select={true}
-        label='Batch'
+    <FormControl fullWidth>
+      <InputLabel id='single-batch-chooser-label'>Batch</InputLabel>
+      <Select
+        displayEmpty
+        labelId='single-batch-chooser-label'
+        id='single-batch-chooser'
         value={batch}
+        label='Batch'
         onChange={event => changeBatch(event.target.value)}
-        helperText=''
       >
-        <MenuItem key='' value={''} selected={batch === ''}>
-          None selected
-        </MenuItem>
         {batchList &&
           batchList
             .filter(b => b !== undefined)
@@ -38,8 +37,8 @@ const BatchChooser: React.FC<{ onBatchChange: (batch: string) => void }> = ({ on
                 {b}
               </MenuItem>
             ))}
-      </TextField>
-    </Stack>
+      </Select>
+    </FormControl>
   );
 };
 

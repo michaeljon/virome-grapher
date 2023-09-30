@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { Theme, useTheme } from '@mui/material/styles';
+import { Theme, styled, useTheme } from '@mui/material/styles';
 
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import MenuItem from '@mui/material/MenuItem';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { Button, Skeleton, Stack } from '@mui/material';
+import { Button, FormControl, InputLabel, Paper, Skeleton, Stack } from '@mui/material';
 
 import { Sequence } from '../Shared/SequenceSet';
+import { OrganismType } from '../Shared/Region';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -22,6 +23,16 @@ const MenuProps = {
   },
 };
 
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+  ...theme.typography.body2,
+  padding: theme.spacing(2),
+  marginTop: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  textAlign: 'center',
+  color: theme.palette.text.secondary,
+}));
+
 function getStyles(sequenceid: Sequence, sequence: readonly Sequence[], theme: Theme) {
   return {
     fontWeight:
@@ -29,12 +40,24 @@ function getStyles(sequenceid: Sequence, sequence: readonly Sequence[], theme: T
   };
 }
 
-const SequenceList: React.FC<{ sequences: Sequence[] | undefined; onCompare: (sequences: Sequence[]) => void }> = ({
-  sequences,
-  onCompare,
-}) => {
+const SequenceList: React.FC<{
+  unfilteredSequences: Sequence[] | undefined;
+  organism: OrganismType | '';
+  onCompare: (sequences: Sequence[]) => void;
+}> = ({ unfilteredSequences, organism, onCompare }) => {
   const theme = useTheme();
-  const [selectedSequenceItems, setSelectedSequenceItems] = React.useState<Sequence[]>(sequences || []);
+
+  const [filteredSequences, setFilteredSequences] = useState<Sequence[]>([]);
+  const [selectedSequenceItems, setSelectedSequenceItems] = useState<Sequence[]>([]);
+
+  useEffect(() => {
+    setSelectedSequenceItems([]);
+    if (organism === '') {
+      setFilteredSequences([]);
+    } else {
+      setFilteredSequences(unfilteredSequences?.filter(s => s.organisms?.includes(organism)) || []);
+    }
+  }, [unfilteredSequences, organism]);
 
   const handleChange = (event: SelectChangeEvent<typeof selectedSequenceItems>) => {
     const {
@@ -42,7 +65,7 @@ const SequenceList: React.FC<{ sequences: Sequence[] | undefined; onCompare: (se
     } = event;
 
     if (typeof value === 'string') {
-      setSelectedSequenceItems(sequences?.filter(s => s.sequenceid === value[0]) || []);
+      setSelectedSequenceItems(filteredSequences?.filter(s => s.sequenceid === value[0]) || []);
     } else {
       const newItems: Sequence[] = [];
 
@@ -52,7 +75,7 @@ const SequenceList: React.FC<{ sequences: Sequence[] | undefined; onCompare: (se
 
       if (len === 1) {
         // there's only one, we're adding it, and it's a string, and we know it's there
-        newItems.push((sequences?.filter(s => s.sequenceid === item) || [])[0]);
+        newItems.push((filteredSequences?.filter(s => s.sequenceid === item) || [])[0]);
       } else {
         // this is the one we're adding or removing
         if (selectedSequenceItems.filter(s => s.sequenceid === item).length > 0) {
@@ -67,7 +90,7 @@ const SequenceList: React.FC<{ sequences: Sequence[] | undefined; onCompare: (se
           for (let v of selectedSequenceItems) {
             newItems.push(v);
           }
-          newItems.push((sequences?.filter(s => s.sequenceid === item) || [])[0]);
+          newItems.push((filteredSequences?.filter(s => s.sequenceid === item) || [])[0]);
         }
       }
 
@@ -75,7 +98,7 @@ const SequenceList: React.FC<{ sequences: Sequence[] | undefined; onCompare: (se
     }
   };
 
-  if (sequences?.length === 0) {
+  if (unfilteredSequences?.length === 0) {
     return (
       <Stack direction='column' spacing={2}>
         <Skeleton animation='wave' variant='rounded' height={60} />
@@ -84,9 +107,13 @@ const SequenceList: React.FC<{ sequences: Sequence[] | undefined; onCompare: (se
   }
 
   return (
-    <Stack direction='column' spacing={2}>
+    <FormControl fullWidth>
+      <InputLabel id='compare-sequence-label'>Sequence</InputLabel>
       <Select
         multiple
+        displayEmpty
+        labelId='compare-sequence-label'
+        id='compare-sequence-chooser'
         value={selectedSequenceItems}
         onChange={handleChange}
         input={<OutlinedInput id='select-multiple-chip' label='Chip' />}
@@ -99,8 +126,8 @@ const SequenceList: React.FC<{ sequences: Sequence[] | undefined; onCompare: (se
         )}
         MenuProps={MenuProps}
       >
-        {sequences &&
-          sequences
+        {filteredSequences &&
+          filteredSequences
             .filter(s => s.sortkey !== undefined)
             .sort((a, b) => a.sortkey.localeCompare(b.sortkey))
             .map(s => (
@@ -110,10 +137,12 @@ const SequenceList: React.FC<{ sequences: Sequence[] | undefined; onCompare: (se
               </MenuItem>
             ))}
       </Select>
-      <Button disabled={selectedSequenceItems?.length === 0} onClick={() => onCompare(selectedSequenceItems)}>
-        Compare
-      </Button>
-    </Stack>
+      <Item>
+        <Button disabled={selectedSequenceItems?.length === 0} onClick={() => onCompare(selectedSequenceItems)}>
+          Compare
+        </Button>
+      </Item>
+    </FormControl>
   );
 };
 

@@ -4,28 +4,14 @@ import { regions } from '../data/hcov-regions';
 
 import OrganismChooser from './OrganismChooser';
 import { OrganismType } from '../Shared/Region';
-import { Container, Stack } from '@mui/material';
+import { Container, Skeleton, Stack } from '@mui/material';
 import { Sequence, SequenceSet } from '../Shared/SequenceSet';
 import SequenceList from './SequenceList';
 import GraphWidget from './GraphWidget';
 import { gene_type } from '../Shared/FeatureList';
 
 const Compare: React.FC<{ sequenceList: SequenceSet }> = ({ sequenceList }) => {
-  const [filteredSequenceList, setFilteredSequenceList] = useState<SequenceSet>();
-
-  const [organisms] = useState<OrganismType[]>([
-    // 'hev-a',
-    // 'hev-b',
-    // 'hev-d',
-    // 'hrv-a',
-    // 'hrv-b',
-    // 'hrv-c',
-    'hcov-229e',
-    'hcov-nl63',
-    'hcov-oc43',
-    'hcov-hku1',
-    'sars-cov-2',
-  ]);
+  const [organisms] = useState<OrganismType[]>(['hcov-229e', 'hcov-nl63', 'hcov-oc43', 'hcov-hku1', 'sars-cov-2']);
   const [organism, setOrganism] = useState<OrganismType | ''>('');
   const [comparables, setComparables] = useState<Sequence[]>();
   const [sequenceData, setSequenceData] = useState<[][]>();
@@ -36,11 +22,8 @@ const Compare: React.FC<{ sequenceList: SequenceSet }> = ({ sequenceList }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (organism === '') {
-      setFilteredSequenceList([]);
-    } else {
+    if (organism !== '') {
       setGenes(regions[organism].genes);
-      setFilteredSequenceList(sequenceList?.filter(s => s.organisms?.includes(organism)));
     }
   }, [organism, sequenceList]);
 
@@ -64,6 +47,7 @@ const Compare: React.FC<{ sequenceList: SequenceSet }> = ({ sequenceList }) => {
   }, [comparables, organism]);
 
   const onOrganismChange = (o: OrganismType | '') => {
+    setComparables(undefined);
     setOrganism(o);
   };
 
@@ -76,7 +60,9 @@ const Compare: React.FC<{ sequenceList: SequenceSet }> = ({ sequenceList }) => {
     <Container maxWidth={false} style={{ marginTop: '2em' }}>
       <Stack spacing={2} direction='column'>
         {organisms && <OrganismChooser organism={organism} organisms={organisms} onOrganismChange={onOrganismChange} />}
-        {organism && <SequenceList sequences={filteredSequenceList} onCompare={onCompare} />}
+        {organism && sequenceList && (
+          <SequenceList organism={organism} unfilteredSequences={sequenceList} onCompare={onCompare} />
+        )}
         {loading === false && (
           <GraphWidget
             organism={organism}

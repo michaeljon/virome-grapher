@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ListSubheader, MenuItem, Skeleton, Stack, TextField } from '@mui/material';
+import { FormControl, InputLabel, ListSubheader, MenuItem, Select, Skeleton, Stack, TextField } from '@mui/material';
 
 import FilterTextField, { containsText } from '../Shared/FilterTextField';
 import { Sequence, SequenceSet } from '../Shared/SequenceSet';
@@ -28,15 +28,15 @@ const SequenceChooser: React.FC<{
   }
 
   return (
-    <Stack direction='column' spacing={2}>
-      <TextField
-        select={true}
+    <FormControl fullWidth>
+      <InputLabel id='single-sequence-label'>Sequence</InputLabel>
+      <Select
+        displayEmpty
+        labelId='single-sequence-label'
+        id='single-sequence-chooser'
+        value={sequenceid}
         label='Sequence'
-        value={sequenceid || ''}
-        onChange={event => {
-          onSequenceChange(event.target.value);
-        }}
-        helperText=''
+        onChange={event => onSequenceChange(event.target.value)}
       >
         <ListSubheader>
           <FilterTextField
@@ -46,9 +46,7 @@ const SequenceChooser: React.FC<{
             placeholderText='Search by sequence id'
           ></FilterTextField>
         </ListSubheader>
-        <MenuItem key={''} value={''}>
-          None selected
-        </MenuItem>
+
         {filteredItems &&
           filteredItems
             .filter(s => s.sortkey !== undefined)
@@ -58,8 +56,8 @@ const SequenceChooser: React.FC<{
                 <strong>{s.sequenceid}</strong> - {s.sample}
               </MenuItem>
             ))}
-      </TextField>
-    </Stack>
+      </Select>
+    </FormControl>
   );
 };
 

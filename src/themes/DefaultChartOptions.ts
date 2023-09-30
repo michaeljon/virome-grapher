@@ -1,6 +1,7 @@
 import { Options } from 'highcharts';
 
 const DefaultChartOptions: Options = {
+  accessibility: { enabled: false },
   title: undefined,
 
   yAxis: {
