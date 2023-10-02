@@ -22,7 +22,10 @@ const GraphWidget: React.FC<{
 }> = ({ organism, feature, onFeatureChanged, comparables, sampleData, genes }) => {
   const isDarkModeEnabled = useMediaQuery('(prefers-color-scheme: dark)');
 
-  const [chartOptions, setChartOptions] = useState<Highcharts.Options>(DefaultChartOptions);
+  const [chartOptions, setChartOptions] = useState<Highcharts.Options>({
+    ...DefaultChartOptions,
+    legend: { enabled: true },
+  });
   const chartComponentRef = useRef<HighchartsReactRefObject>(null);
 
   useEffect(() => {

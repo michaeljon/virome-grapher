@@ -20,5 +20,6 @@ docker tag virome_grapher:latest 593076166250.dkr.ecr.us-east-1.amazonaws.com/vi
 docker push 593076166250.dkr.ecr.us-east-1.amazonaws.com/virome_grapher:${TAG}
 
 # todo - update the task, restart the service
-echo "Run the following on the EC2"
+echo "Run the following on the EC2 after you set AWS variables"
+echo "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 593076166250.dkr.ecr.us-east-1.amazonaws.com"
 echo "docker run --restart=unless-stopped -p 8080:8080 593076166250.dkr.ecr.us-east-1.amazonaws.com/virome_grapher:${TAG}"
