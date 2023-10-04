@@ -6,7 +6,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import TextField from '@mui/material/TextField';
 
-import useFocusableInput from '../useFocusableInput';
+import useFocusableInput from './useFocusableInput';
 
 /**
  * Input properties for a filter text field. A text field that filters applies the provided

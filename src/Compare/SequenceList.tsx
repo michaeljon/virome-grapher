@@ -34,10 +34,13 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 function getStyles(sequenceid: Sequence, sequence: readonly Sequence[], theme: Theme) {
-  return {
-    fontWeight:
-      sequence.indexOf(sequenceid) === -1 ? theme.typography.fontWeightRegular : theme.typography.fontWeightMedium,
-  };
+  return sequence.indexOf(sequenceid) === -1
+    ? {
+        fontWeight: theme.typography.fontWeightRegular,
+      }
+    : {
+        fontWeight: theme.typography.fontWeightBold,
+      };
 }
 
 const SequenceList: React.FC<{

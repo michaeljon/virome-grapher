@@ -15,6 +15,7 @@ import { gene_type } from '../Shared/FeatureList';
 import OrganismChooser from './OrganismChooser';
 import BatchChooser from './BatchChooser';
 import GraphWidget from './GraphWidget';
+import MainNavigation from '../Shared/MainNavigation';
 
 LicenseInfo.setLicenseKey(
   'd5b1af81ba5a5af69badc2110cda5c02Tz02MjU4NCxFPTE3MTExMjI2NjM5MTYsUz1wcm8sTE09c3Vic2NyaXB0aW9uLEtWPTI='
@@ -125,8 +126,9 @@ const Single: React.FC<{ sequenceList: SequenceSet }> = ({ sequenceList }) => {
   };
 
   return (
-    <Container maxWidth={false} style={{ marginTop: '2em' }}>
+    <Container maxWidth={false}>
       <Stack spacing={2} direction='column'>
+        <MainNavigation />
         <BatchChooser onBatchChange={onBatchChange} />
         <SequenceChooser
           sequenceList={filteredSequenceList}

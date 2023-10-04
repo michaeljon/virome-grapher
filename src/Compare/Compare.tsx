@@ -9,6 +9,7 @@ import { Sequence, SequenceSet } from '../Shared/SequenceSet';
 import SequenceList from './SequenceList';
 import GraphWidget from './GraphWidget';
 import { gene_type } from '../Shared/FeatureList';
+import MainNavigation from '../Shared/MainNavigation';
 
 const Compare: React.FC<{ sequenceList: SequenceSet }> = ({ sequenceList }) => {
   const [organisms] = useState<OrganismType[]>(['hcov-229e', 'hcov-nl63', 'hcov-oc43', 'hcov-hku1', 'sars-cov-2']);
@@ -57,8 +58,9 @@ const Compare: React.FC<{ sequenceList: SequenceSet }> = ({ sequenceList }) => {
   };
 
   return (
-    <Container maxWidth={false} style={{ marginTop: '2em' }}>
+    <Container maxWidth={false}>
       <Stack spacing={2} direction='column'>
+        <MainNavigation />
         {organisms && <OrganismChooser organism={organism} organisms={organisms} onOrganismChange={onOrganismChange} />}
         {organism && sequenceList && (
           <SequenceList organism={organism} unfilteredSequences={sequenceList} onCompare={onCompare} />
