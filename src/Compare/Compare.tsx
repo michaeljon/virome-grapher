@@ -4,7 +4,7 @@ import { regions } from '../data/hcov-regions';
 
 import OrganismChooser from './OrganismChooser';
 import { OrganismType } from '../Shared/Region';
-import { Container, Skeleton, Stack } from '@mui/material';
+import { Box, Container, Paper, Skeleton, Stack } from '@mui/material';
 import { Sequence, SequenceSet } from '../Shared/SequenceSet';
 import SequenceList from './SequenceList';
 import GraphWidget from './GraphWidget';

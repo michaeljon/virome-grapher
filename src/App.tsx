@@ -6,11 +6,11 @@ import { Container, CssBaseline, ThemeProvider, useMediaQuery } from '@mui/mater
 
 import Highcharts, { Options } from 'highcharts';
 
-import { lightTheme } from './themes/light.theme';
-import { darkTheme } from './themes/dark.theme';
+// import { lightTheme } from './themes/light.theme';
+// import { darkTheme } from './themes/dark.theme';
 
-import BrandDark from './themes/BrandDark';
-import BrandLightTheme from './themes/BrandLight';
+import { darkTheme } from './themes/custom.theme';
+import { lightTheme } from './themes/custom.theme';
 
 import Home from './Home/Home';
 import Single from './Single/Single';
@@ -20,7 +20,8 @@ import { SequenceSet } from './Shared/SequenceSet';
 Highcharts.setOptions({
   chart: {
     style: {
-      fontFamily: 'Roboto',
+      fontFamily:
+        "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'",
     },
   },
 });
@@ -30,11 +31,6 @@ const App = () => {
   const overallTheme = useMemo(() => (isDarkModeEnabled ? darkTheme : lightTheme), [isDarkModeEnabled]);
 
   const [sequenceList, setSequenceList] = useState<SequenceSet>([]);
-
-  useEffect(() => {
-    const theme = isDarkModeEnabled ? BrandDark : BrandLightTheme;
-    // Highcharts.setOptions(theme as any as Options);
-  }, [isDarkModeEnabled]);
 
   // get the sequence list
   useEffect(() => {

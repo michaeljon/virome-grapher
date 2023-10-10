@@ -84,6 +84,11 @@ const GapTable: React.FC<{ sequenceid: string; organism: OrganismType; setFeatur
         onRowClick={onRowClick}
         pageSizeOptions={[10]}
         initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+        sx={{
+          boxShadow: 2,
+          border: 2,
+          borderColor: 'primary.light',
+        }}
       />
     </div>
   );

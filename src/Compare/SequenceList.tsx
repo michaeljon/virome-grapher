@@ -141,7 +141,11 @@ const SequenceList: React.FC<{
             ))}
       </Select>
       <Item>
-        <Button disabled={selectedSequenceItems?.length === 0} onClick={() => onCompare(selectedSequenceItems)}>
+        <Button
+          variant='contained'
+          disabled={selectedSequenceItems?.length === 0}
+          onClick={() => onCompare(selectedSequenceItems)}
+        >
           Compare
         </Button>
       </Item>
